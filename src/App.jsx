@@ -1,34 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import {
+  createBrowserRouter, 
+  createRoutesFromElements,
+  Route, 
+  RouterProvider
+} from 'react-router-dom'
 
-function App() {
-  const [count, setCount] = useState(0)
+import Home from './pages/Home'
+import TextEffect from './pages/TextEffect'
 
+import { Outlet, NavLink } from "react-router-dom";
+
+function RootLayout() {
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <div className="pbr-container">
+      <header>
+        <nav className='pbr-menu'>
+          <div className='pbr-menu__logo'>
+            Logo
+          </div>
+          <NavLink to="/">Home</NavLink>    { /* NavLink has an active to know where we are */ }
+          <NavLink to="text-effect">Text Effect</NavLink>
+        </nav>
+      </header>
+      <main>
+        <Outlet />    { /* the page of the Route element is displayed */ }
+      </main>
     </div>
   )
+}
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<RootLayout />}>
+      <Route index element={<Home />} />
+      <Route path="text-effect" element={<TextEffect />}>
+      </Route>
+
+      { /* TODO: <Route path="*" element={<NotFound />} /> */ }
+    </Route>
+  )
+)
+
+function App() {
+  return (
+    <RouterProvider router={router} />
+  );
 }
 
 export default App
