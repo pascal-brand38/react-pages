@@ -7,6 +7,7 @@ import {
 
 import Home from './pages/Home'
 import TextEffect from './pages/TextEffect'
+import Theme from './pages/Theme'
 
 import { Outlet, NavLink } from "react-router-dom";
 
@@ -20,6 +21,7 @@ function RootLayout() {
           </div>
           <NavLink to="/">Home</NavLink>    { /* NavLink has an active to know where we are */ }
           <NavLink to="text-effect">Text Effect</NavLink>
+          <NavLink to="theme">Theme</NavLink>
         </nav>
       </header>
       <main>
@@ -33,8 +35,8 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<RootLayout />}>
       <Route index element={<Home />} />
-      <Route path="text-effect" element={<TextEffect />}>
-      </Route>
+      <Route path="text-effect" element={<TextEffect />} />
+      <Route path="theme" element={<Theme />} />
 
       { /* TODO: <Route path="*" element={<NotFound />} /> */ }
     </Route>
