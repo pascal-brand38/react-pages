@@ -1,46 +1,52 @@
-import { useState, useEffect } from "react";
+/// Copyright (c) Pascal Brand
+/// MIT License
+///
+/// Theme changer (colors,...) from css variables
+/// Note that react's state as useless as changing a css variable value update the
+/// site rendering.
 
 
-function setColor(setState, variable, newColor) {
-  setState(newColor)
-  document.documentElement.style.setProperty(variable, newColor);
-  // getComputedStyle(document.documentElement).getPropertyValue('--body-bg-color')
+/// get and set values of css variables
+const cssVar = {
+  get: (name) => {
+    // from https://stackoverflow.com/questions/62750308/getpropertyvalue-includes-whitespace-of-css-formating-when-retrieving-custom-c
+    //    trim() to remove the whitespace in front and end of the css value
+    //    as getPropertyValue reflects how the css is written (with whitespace or without)
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  },
+  set: (name, value) => {
+    document.documentElement.style.setProperty(name, value);
+  },
 }
 
-function ColorTheme({ cssVar, state, setState }) {
+/// display an input button to choose the color of a css variable
+function ChooseColorInTheme({ nameCssVar }) {
   const cssVarStyle = {
     display: "flex",
     gap: "1rem",
   }
   return (
     <div style={ cssVarStyle }>
-      <label> { cssVar } </label>
+      <label> { nameCssVar } </label>
       <input 
         type = "color"
-        defaultValue = { state }
-        onChange = { (e) => { setColor(setState, cssVar, e.target.value); } }
+        defaultValue = { cssVar.get(nameCssVar)}
+        onChange = { (e) => { cssVar.set(nameCssVar, e.target.value); } }
         />
     </div>
   );
 }
 
 
+/// Display all css variable we are able to update
 function Theme() {
-  var [ color1, setColor1 ] = useState('#bc4123')
-  var [ bodyBgColor, setBodyBgColor ] = useState('#2b3452')
-
-  // useEffect( () => {
-  //   console.log('useeffect ', getComputedStyle(document.documentElement).getPropertyValue('--color-1'))
-  //   setColor(setPrimaryColor, '--color-1', getComputedStyle(document.documentElement).getPropertyValue('--color-1'));
-
-  // }, []); // ran only once
-
   return (
     <>
       <h2> Themes</h2>
 
-      <ColorTheme cssVar='--body-bg-color' state={bodyBgColor} setState={setBodyBgColor} />
-      <ColorTheme cssVar='--color-1' state={color1} setState={setColor1} />
+      <ChooseColorInTheme nameCssVar='--body-color' />
+      <ChooseColorInTheme nameCssVar='--body-bg-color' />
+      <ChooseColorInTheme nameCssVar='--color-1' />
 
     </>
   );

@@ -3,16 +3,17 @@
 ///
 
 @import "./scss/utility/pbr-reset.scss";
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 :root {
-  --body-color: white;
+  // colors - do not use html color code (such as FloralWhite) as not recognized by the theme setter
+  --body-color: #FFFFFF;
   --body-bg-color: #2b3452;
   --color-1: #bc4123;
 }
 
 body {
-  font-family: Poppins;
+  font-family: Roboto;
   font-size: 16px;
   background-color: var(--body-bg-color);
   color: var(--body-color);
