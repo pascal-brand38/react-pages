@@ -1,3 +1,7 @@
+/// Copyright (c) Pascal Brand
+/// MIT License
+///
+
 function TextEffect() {
   return (
     <>
@@ -8,3 +12,5 @@ function TextEffect() {
 }
 
 export default TextEffect
+
+// TODO: https://youtu.be/bmgSKpt30gc

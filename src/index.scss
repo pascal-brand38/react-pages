@@ -1,23 +1,28 @@
+/// Copyright (c) Pascal Brand
+/// MIT License
+///
+
 @import "./scss/utility/pbr-reset.scss";
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
 :root {
-  /* TODO: change these colors from the homepage, for different themes */
-  --primary: #bc4123;
-  --secondary: #2b3452;
+  --body-color: white;
+  --body-bg-color: #2b3452;
+  --color-1: #bc4123;
 }
 
 body {
   font-family: Poppins;
   font-size: 16px;
+  background-color: var(--body-bg-color);
+  color: var(--body-color);
+
 }
 
 .pbr-container {
   max-width: 1024px;
+  margin: auto;
   padding: 1rem;
-  background-color: var(--secondary);
-  color: white;
-  height: 100vh;
 }
 
 .pbr-menu {
@@ -41,7 +46,7 @@ body {
     display: block;
   
     &.active {    // active comes from React NavLink - this is the page we're on
-      border-bottom: 2px solid var(--primary);
+      border-bottom: 2px solid var(--color-1);
     }
   }
 }

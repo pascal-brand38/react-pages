@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 function setColor(setState, variable, newColor) {
   setState(newColor)
   document.documentElement.style.setProperty(variable, newColor);
-  // getComputedStyle(document.documentElement).getPropertyValue('--secondary')
+  // getComputedStyle(document.documentElement).getPropertyValue('--body-bg-color')
 }
 
 function ColorTheme({ cssVar, state, setState }) {
@@ -26,12 +26,12 @@ function ColorTheme({ cssVar, state, setState }) {
 
 
 function Theme() {
-  var [ primaryColor, setPrimaryColor ] = useState('#bc4123')
-  var [ secondaryColor, setSecondaryColor ] = useState('#2b3452')
+  var [ color1, setColor1 ] = useState('#bc4123')
+  var [ bodyBgColor, setBodyBgColor ] = useState('#2b3452')
 
   // useEffect( () => {
-  //   console.log('useeffect ', getComputedStyle(document.documentElement).getPropertyValue('--primary'))
-  //   setColor(setPrimaryColor, '--primary', getComputedStyle(document.documentElement).getPropertyValue('--primary'));
+  //   console.log('useeffect ', getComputedStyle(document.documentElement).getPropertyValue('--color-1'))
+  //   setColor(setPrimaryColor, '--color-1', getComputedStyle(document.documentElement).getPropertyValue('--color-1'));
 
   // }, []); // ran only once
 
@@ -39,8 +39,8 @@ function Theme() {
     <>
       <h2> Themes</h2>
 
-      <ColorTheme cssVar='--primary' state={primaryColor} setState={setPrimaryColor} />
-      <ColorTheme cssVar='--secondary' state={secondaryColor} setState={setSecondaryColor} />
+      <ColorTheme cssVar='--body-bg-color' state={bodyBgColor} setState={setBodyBgColor} />
+      <ColorTheme cssVar='--color-1' state={color1} setState={setColor1} />
 
     </>
   );
