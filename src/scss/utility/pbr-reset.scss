@@ -62,4 +62,9 @@ input, textarea {
   font-size: inherit ;
   font-weight: inherit ;
   // background-color: inherit;  not inherited - cf. https://developer.mozilla.org/fr/docs/Web/CSS/background-color#sp%C3%A9cifications
-}  
+}
+
+button {
+  color: inherit;
+  font-size: inherit;
+}

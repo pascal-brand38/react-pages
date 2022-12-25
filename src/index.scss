@@ -6,15 +6,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 :root {
+  --root-font-size: 16px;
+
   // colors - do not use html color code (such as FloralWhite) as not recognized by the theme setter
-  --body-color: #FFFFFF;
+  --body-color: #ffffff;
   --body-bg-color: #2b3452;
   --color-1: #bc4123;
+
+  //
+  --margin-1: 2rem;
+
+  // 
+  font-size: var(--root-font-size);
+
 }
 
 body {
   font-family: Roboto;
-  font-size: 16px;
   background-color: var(--body-bg-color);
   color: var(--body-color);
 
@@ -50,4 +58,11 @@ body {
       border-bottom: 2px solid var(--color-1);
     }
   }
+}
+
+.pbr-button {
+  margin: var(--margin-1);
+  background-color: var(--color-1);
+  padding: .5rem 2rem .5rem 2rem;
+  border-radius: 1rem;
 }
