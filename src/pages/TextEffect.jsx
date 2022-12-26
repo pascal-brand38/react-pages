@@ -7,6 +7,9 @@ function TextEffect() {
     <>
       <h2> Text Effect</h2>
       <h3> In progress...</h3>
+      <p>
+        Will include many links that are useful for learning...
+      </p>
     </>
   );
 }
