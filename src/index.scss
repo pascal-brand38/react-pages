@@ -66,3 +66,12 @@ body {
   padding: .5rem 2rem .5rem 2rem;
   border-radius: 1rem;
 }
+
+.pbr-underline-all {
+  border-bottom: 3px solid var(--color-1);
+}
+
+h1, h2 {
+  margin-top: var(--margin-1);
+  margin-bottom: var(--margin-1);
+}

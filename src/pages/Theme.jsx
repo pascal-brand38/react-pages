@@ -72,8 +72,31 @@ function ChooseSizeInTheme({ aCssVar }) {
   );
 }
 
+function ThemeSize({ sizes, title }) {
+  return (
+    <>
+      <h2 className="pbr-underline-all"> {title} </h2>
+      {
+        sizes.map((size, index) => {
+          return ( <ChooseSizeInTheme key={index} aCssVar={size} /> );
+        })
+      }
+    </>
+  )
+}
 
-
+function ThemeColor({ colors, title }) {
+  return (
+    <>
+      <h2 className="pbr-underline-all"> {title} </h2>
+      {
+        colors.map((color, index) => {
+          return ( <ChooseColorInTheme key={index} aCssVar={color} /> );
+        })
+      }
+    </>
+  )
+}
 /// Display all css variable we are able to update
 function Theme() {
   const colors = [
@@ -81,6 +104,7 @@ function Theme() {
     cssVar('--body-bg-color'),
     cssVar('--color-1'),
   ];
+
   const sizes = [
     cssVar('--root-font-size'),
     cssVar('--margin-1'),
@@ -93,21 +117,9 @@ function Theme() {
 
   return (
     <>
-      <h2> Themes</h2>
-      {
-        colors.map((color, index) => {
-          return (
-            <ChooseColorInTheme key={index} aCssVar={color} />
-          );
-        })
-      }
-      {
-        sizes.map((size, index) => {
-          return (
-            <ChooseSizeInTheme key={index} aCssVar={size} />
-          );
-        })
-      }
+      <h1> Themes</h1>
+      <ThemeColor colors={colors} title='Colors' />
+      <ThemeSize sizes={sizes} title='Sizes' />
 
       <button className="pbr-button"
         onClick={reset}>
@@ -118,4 +130,4 @@ function Theme() {
   );
 }
 
-export default Theme 
+export default Theme
