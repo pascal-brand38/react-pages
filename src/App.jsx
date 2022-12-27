@@ -8,6 +8,7 @@ import {
 import Home from './pages/Home'
 import TextEffect from './pages/TextEffect'
 import Theme from './pages/Theme'
+import Meteo from './pages/Meteo'
 
 import { Outlet, NavLink } from "react-router-dom";
 
@@ -39,6 +40,7 @@ const router = createHashRouter(
       <Route index element={<Home />} />
       <Route path="text-effect" element={<TextEffect />} />
       <Route path="theme" element={<Theme />} />
+      <Route path="meteo" element={<Meteo />} />
 
       { /* TODO: <Route path="*" element={<NotFound />} /> */ }
     </Route>
