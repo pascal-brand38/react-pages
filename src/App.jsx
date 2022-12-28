@@ -23,6 +23,7 @@ function RootLayout() {
           <NavLink to="/">Home</NavLink>    { /* NavLink has an active to know where we are */ }
           <NavLink to="text-effect">Text Effect</NavLink>
           <NavLink to="theme">Theme</NavLink>
+          <NavLink to="meteo">Meteo</NavLink>
         </nav>
       </header>
       <main>
