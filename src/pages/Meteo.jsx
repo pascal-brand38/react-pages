@@ -1,10 +1,9 @@
 /// Copyright (c) Pascal Brand
 /// MIT License
 ///
-/// 
+///
 
-
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 import {
   Chart as ChartJS,
@@ -15,8 +14,8 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
+} from "chart.js";
+import { Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -28,125 +27,158 @@ ChartJS.register(
   Legend
 );
 
-export const options = {
+const meteoConfig = {
+  apis: ["meteofrance", "dwd-icon", "gem"],
+  apisDesc: ["Météo France", "Météo Allemagne", "Météo Amérique du nord"],
+
+  dataField: [
+    {
+      title: 'Température',
+      extract: (dataMeteo) => dataMeteo.hourly.temperature_2m,
+      apiField: 'temperature_2m',
+      axisSuffix: '°'
+    }
+  ],
+};
+
+// https://open-meteo.com/en/docs/geocoding-api
+// get latitude and longitude from town name
+async function getDataTown(town) {
+  return fetch(
+    "https://geocoding-api.open-meteo.com/v1/search?name=" + town
+  ).then((response) => {
+    return response.json();
+  });
+}
+
+// https://open-meteo.com/en/docs/meteofrance-api
+// get meteo (forecast) at latitude / longitude, from the given api (meteofrance / dwd-icon / gem)
+async function getMeteoData(latitude, longitude, api, indexWhat) {
+  const baseurl = "https://api.open-meteo.com/v1/";
+  const where = "&latitude=" + latitude + "&longitude=" + longitude;
+  const what = "&hourly=" + meteoConfig.dataField[indexWhat].apiField;
+  const timezone = "&timezone=Europe%2FBerlin";
+  return fetch(baseurl + api + "?" + where + what + timezone).then(
+    (response) => {
+      return response.json();
+    }
+  );
+}
+
+async function getMultipleApisMeteoDatas(latitude, longitude, apis, indexWhat) {
+  var cmds = [];
+  apis.forEach((api) => {
+    cmds.push(getMeteoData(latitude, longitude, api, indexWhat));
+  });
+  return Promise.all(cmds);
+}
+
+var chartjsOptions = {
   responsive: true,
-  color: 'White',
+  color: "White",
   plugins: {
     legend: {
-      position: 'top',
+      position: "top",
     },
     title: {
       display: true,
-      text: 'Temperature',
-      color: 'White'
+      color: "White",
     },
   },
   elements: {
     point: {
       pointStyle: false,
-    }
+    },
   },
-  scales: {   // checks https://www.chartjs.org/docs/latest/axes/labelling.html#creating-custom-tick-formats
+  scales: {
+    // checks https://www.chartjs.org/docs/latest/axes/labelling.html#creating-custom-tick-formats
     x: {
       ticks: {
-          callback: function(value, index, ticks) {
-            if ((index + 12) % 24 == 0) {
-              const reYearMonth = /[0-9]{4}-[0-9]{2}-/g
-              const reT = /T/g
-              return this.getLabelForValue(value).replace(reYearMonth, '').replace(reT, ' ')
-            } else {
-              return '';
-            }
+        callback: function (value, index, ticks) {
+          if ((index + 12) % 24 == 0) {
+            const reYearMonth = /[0-9]{4}-[0-9]{2}-/g;
+            const reT = /T/g;
+            return this.getLabelForValue(value)
+              .replace(reYearMonth, "")
+              .replace(reT, " ");
+          } else {
+            return "";
           }
-      }
+        },
+      },
+    },
+    y: {
+      ticks: {
+        callback: function (value, index, ticks) {
+          return value + "°";   // TODO: use suffix there
+        },
+      },
+    },
   },
-  y: {
-    ticks: {
-        callback: function(value, index, ticks) {
-          return value + '°';
-        }
-    }
-}
-}
-
 };
 
+const configs = [
+  {
+    borderColor: "rgba(255, 99, 132)",
+    backgroundColor: "rgba(255, 99, 132, 0.5)",
+  },
+  {
+    borderColor: "rgb(99, 255, 132)",
+    backgroundColor: "rgb(99, 255, 132, 0.5)",
+  },
+  {
+    borderColor: "rgb(132, 99, 255)",
+    backgroundColor: "rgba(132, 99, 255, 0.5)",
+  },
+];
 
 function Meteo() {
-  var [ graphData, setGraphData ] = useState(null)
+  var [graphData, setGraphData] = useState(null);
+  var [town, setTown] = useState("bordeaux");
+  var [indexWhat, setIndexWhat] = useState(0);
 
   useEffect(() => {
-    const configs = [ 
-      {
-        api: 'meteofrance',
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-      },
-      {
-        api: 'dwd-icon',    // german
-        borderColor: 'rgb(99, 255, 132)',
-        backgroundColor: 'rgb(99, 255, 132, 0.5)',
-      },
-      {
-        api: 'gem',         // north america
-        borderColor: 'rgb(132, 99, 255)',
-        backgroundColor: 'rgba(132, 99, 255, 0.5)',
-      },
-    ]
-
-    // check https://open-meteo.com/en/docs/meteofrance-api
-    const coord = {
-      bordeaux: {
-        lat: 44.841409,
-        long: -0.569515,
-      }
-    }
-    var cmds = []
-    const baseurl = 'https://api.open-meteo.com/v1/'
-    const where = '&latitude=' + coord.bordeaux.lat + '&longitude=' + coord.bordeaux.long;
-    const what = '&hourly=temperature_2m&current_weather=true&timezone=Europe%2FBerlin'
-    configs.forEach((configs) => { cmds.push(fetch(baseurl + configs.api + '?' + where + what)); });
-
-    // https://gomakethings.com/waiting-for-multiple-all-api-responses-to-complete-with-the-vanilla-js-promise.all-method/
-    Promise.all(
-      cmds
-      ).then(function (responses) {
-      // Get a JSON object from each of the responses
-      return Promise.all(responses.map(function (response) {
-        return response.json();
-      }))}).
-      then(function(datas) {
+    getDataTown(town).then((dataTown) => {
+      // https://gomakethings.com/waiting-for-multiple-all-api-responses-to-complete-with-the-vanilla-js-promise.all-method/
+      getMultipleApisMeteoDatas(
+        dataTown.results[0].latitude,
+        dataTown.results[0].longitude,
+        meteoConfig.apis,
+        indexWhat
+      ).then(function (datas) {
         var labels = null;
         var datasets = [];
-        datas.forEach( (data, index) => {
-          console.log(configs[index].api, data)
-          if ((!labels) || (labels.length < data.hourly.time.length)) {
+        datas.forEach((data, index) => {
+          if (!labels || labels.length < data.hourly.time.length) {
             labels = data.hourly.time;
           }
           datasets.push({
-              label: configs[index].api,
-              data: data.hourly.temperature_2m,
-              borderColor: configs[index].borderColor,
-              backgroundColor: configs[index].backgroundColor,
-              borderWidth: 1,
+            label: meteoConfig.apisDesc[index],
+            data: meteoConfig.dataField[indexWhat].extract(data),
+            borderColor: configs[index].borderColor,
+            backgroundColor: configs[index].backgroundColor,
+            borderWidth: 1,
           });
-        })
-        setGraphData({
-            labels: labels,
-            datasets: datasets,
-        })
-      })
-  }, []);
+        });
+        chartjsOptions.plugins.title.text = meteoConfig.dataField[indexWhat].title
 
+        setGraphData({
+          labels: labels,
+          datasets: datasets,
+        });
+      });
+    });
+  }, [town]);
 
   if (graphData) {
-    return <Line options={options} data={graphData} />;
+    return <Line options={chartjsOptions} data={graphData} />;
   } else {
-    return (<p> Loading...</p>)
+    return <p> Loading...</p>;
   }
-
 }
 
 export default Meteo;
 
 // TODO: lat/long from town list
+//    https://open-meteo.com/en/docs/geocoding-api
+//    https://codesandbox.io/s/clever-violet-vxupkq?file=/src/App.js
