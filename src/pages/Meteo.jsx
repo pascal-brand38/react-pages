@@ -4,6 +4,12 @@
 ///
 
 import { useEffect, useState } from "react";
+import Dropdown from 'react-dropdown';
+import 'react-dropdown/style.css';
+
+const dropdownOptions = [
+  'one', 'two', 'three'
+];
 
 import {
   Chart as ChartJS,
@@ -27,17 +33,37 @@ ChartJS.register(
   Legend
 );
 
+// from https://open-meteo.com/en/docs/meteofrance-api
 const meteoConfig = {
   apis: ["meteofrance", "dwd-icon", "gem"],
   apisDesc: ["Météo France", "Météo Allemagne", "Météo Amérique du nord"],
 
-  dataField: [
+  measures: [
     {
-      title: 'Température',
+      label: 'Température',     // label is required for dropdown react plugin
       extract: (dataMeteo) => dataMeteo.hourly.temperature_2m,
       apiField: 'temperature_2m',
       axisSuffix: '°'
-    }
+    },
+    {
+      label: 'Précipitations',
+      extract: (dataMeteo) => dataMeteo.hourly.precipitation,
+      apiField: 'precipitation',
+      axisSuffix: 'mm'
+    },
+    {
+      label: 'Couverture nuageuse',
+      extract: (dataMeteo) => dataMeteo.hourly.cloudcover,
+      apiField: 'cloudcover',
+      axisSuffix: '%'
+    },
+    {
+      label: 'Vent',
+      extract: (dataMeteo) => dataMeteo.hourly.windspeed_10m,
+      apiField: 'windspeed_10m',
+      axisSuffix: 'km/h'
+    },
+    
   ],
 };
 
@@ -53,10 +79,10 @@ async function getDataTown(town) {
 
 // https://open-meteo.com/en/docs/meteofrance-api
 // get meteo (forecast) at latitude / longitude, from the given api (meteofrance / dwd-icon / gem)
-async function getMeteoData(latitude, longitude, api, indexWhat) {
+async function getMeteoData(latitude, longitude, api, measureIndex) {
   const baseurl = "https://api.open-meteo.com/v1/";
   const where = "&latitude=" + latitude + "&longitude=" + longitude;
-  const what = "&hourly=" + meteoConfig.dataField[indexWhat].apiField;
+  const what = "&hourly=" + meteoConfig.measures[measureIndex].apiField;
   const timezone = "&timezone=Europe%2FBerlin";
   return fetch(baseurl + api + "?" + where + what + timezone).then(
     (response) => {
@@ -65,10 +91,10 @@ async function getMeteoData(latitude, longitude, api, indexWhat) {
   );
 }
 
-async function getMultipleApisMeteoDatas(latitude, longitude, apis, indexWhat) {
+async function getMultipleApisMeteoDatas(latitude, longitude, apis, measureIndex) {
   var cmds = [];
   apis.forEach((api) => {
-    cmds.push(getMeteoData(latitude, longitude, api, indexWhat));
+    cmds.push(getMeteoData(latitude, longitude, api, measureIndex));
   });
   return Promise.all(cmds);
 }
@@ -132,10 +158,14 @@ const configs = [
   },
 ];
 
+function measureSelect(e, setMeasureIndex) {
+  setMeasureIndex(meteoConfig.measures.findIndex((element) => ((element.label) === e.label)))
+}
+
 function Meteo() {
   var [graphData, setGraphData] = useState(null);
-  var [town, setTown] = useState("bordeaux");
-  var [indexWhat, setIndexWhat] = useState(0);
+  var [town, setTown] = useState('bordeaux');
+  var [measureIndex, setMeasureIndex] = useState(0);  
 
   useEffect(() => {
     getDataTown(town).then((dataTown) => {
@@ -144,7 +174,7 @@ function Meteo() {
         dataTown.results[0].latitude,
         dataTown.results[0].longitude,
         meteoConfig.apis,
-        indexWhat
+        measureIndex
       ).then(function (datas) {
         var labels = null;
         var datasets = [];
@@ -154,13 +184,17 @@ function Meteo() {
           }
           datasets.push({
             label: meteoConfig.apisDesc[index],
-            data: meteoConfig.dataField[indexWhat].extract(data),
+            data: meteoConfig.measures[measureIndex].extract(data),
             borderColor: configs[index].borderColor,
             backgroundColor: configs[index].backgroundColor,
             borderWidth: 1,
           });
         });
-        chartjsOptions.plugins.title.text = meteoConfig.dataField[indexWhat].title
+        chartjsOptions.plugins.title.text = meteoConfig.measures[measureIndex].label
+        chartjsOptions.scales.y.ticks.callback = 
+          function (value, index, ticks) {
+            return value + meteoConfig.measures[measureIndex].axisSuffix;   // TODO: not
+          },
 
         setGraphData({
           labels: labels,
@@ -168,12 +202,18 @@ function Meteo() {
         });
       });
     });
-  }, [town]);
+  }, [town, measureIndex]);
 
   if (graphData) {
-    return <Line options={chartjsOptions} data={graphData} />;
+    // check dropdown styling at https://www.npmjs.com/package/react-dropdown
+    return (
+      <>
+        <Dropdown options={meteoConfig.measures} onChange={(e) => measureSelect(e, setMeasureIndex)} value={meteoConfig.measures[0]} placeholder="Select a measure" />
+        <Line options={chartjsOptions} data={graphData} />
+      </>
+    );
   } else {
-    return <p> Loading...</p>;
+    return <p> Loading...</p>
   }
 }
 
