@@ -1,0 +1,45 @@
+/// Copyright (c) Pascal Brand
+/// MIT License
+///
+// dropdown
+
+.pbr-dropdown {
+  position: relative;   // relative position for the selected value
+                        // the dropdown list is absolute so that what's below the control
+                        // keep its position
+
+  //margin: var(--margin-m);
+  background-color: var(--color-1);
+  // padding: .5rem 2rem .5rem 2rem;
+  padding: var(--margin-s);
+
+  // border-radius: 1rem;
+                      
+  // pbr-dropdown__top styles the button/input of the dropdown
+  &__top {
+    display: grid;
+    grid-template-columns: 1fr 20px;
+    align-items: center;
+  }
+
+  // pbr-dropdown__top styles the button/input of the dropdown
+  &__list {
+    position: absolute;       // right after the button, without moving the entire page
+    z-index: 1;               // the list is printed above the rest of the page
+    list-style-type: none;
+    margin-top: var(--margin-s);
+    background-color: inherit;
+    padding: 0 var(--margin-m);
+
+    //margin: 5px 0;
+    //padding: 0;
+  
+    //border: 1px solid grey;
+    // width: 150px;
+  }
+
+  &__list-item:hover {
+    opacity: 0.5;
+  }
+  
+}

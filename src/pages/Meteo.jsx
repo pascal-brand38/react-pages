@@ -4,8 +4,7 @@
 ///
 
 import { useEffect, useState } from "react";
-import Dropdown from 'react-dropdown';
-import 'react-dropdown/style.css';
+import PbrDropdown from '../components/PbrDropdown'
 
 import {
   Chart as ChartJS,
@@ -59,7 +58,7 @@ const meteoConfig = {
       apiField: 'windspeed_10m',
       axisSuffix: 'km/h'
     },
-    
+
   ],
 };
 
@@ -164,15 +163,12 @@ const configs = [
   },
 ];
 
-function measureSelect(e, setMeasureIndex) {
-  setMeasureIndex(meteoConfig.measures.findIndex((element) => ((element.label) === e.label)))
-}
 
 function Meteo() {
   var [graphData, setGraphData] = useState(null);
-  var [measureIndex, setMeasureIndex] = useState(0);  
-  var [ townCandidates, setTownCandidates ] = useState(null);
-  var [ townInfo, setTownInfo ] = useState(null);
+  var [measureIndex, setMeasureIndex] = useState(0);
+  var [townCandidates, setTownCandidates] = useState(null);
+  var [townInfo, setTownInfo] = useState(null);
 
   function getTownCandidates(townStartsWith) {
     console.log(townStartsWith);
@@ -223,12 +219,27 @@ function Meteo() {
   }, [townInfo, measureIndex]);
 
   if (graphData) {
-    // check dropdown styling at https://www.npmjs.com/package/react-dropdown
     return (
       <>
-        <MySearchBar menu={townCandidates} handle={getTownCandidates} select={setTownInfo} />
-        {/* <Dropdown options={meteoConfig.measures} onChange={(e) => measureSelect(e, setMeasureIndex)} value={meteoConfig.measures[0]} placeholder="Select a measure" /> */}
-        <MyDropdown menu={meteoConfig.measures} indexCurrent={measureIndex} handle={setMeasureIndex}/>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--margin-s)" }}>
+        <PbrDropdown
+          type='searchbar'
+          initialValue={ 'Bordeaux - Gironde '}
+          list={townCandidates}
+          onChange={ getTownCandidates}
+          onSelect={ ({item}) => setTownInfo(item) }
+          valueFromItem={(item) => item.name + ' - ' + item.admin2}
+          />
+
+        <PbrDropdown
+          type='dropdown'
+          initialValue={meteoConfig.measures[measureIndex].label}
+          list={meteoConfig.measures}
+          onSelect={ ({index}) => setMeasureIndex(index) }
+          valueFromItem={(item) => item.label}
+          />
+          </div>
+
         <Line options={chartjsOptions} data={graphData} />
       </>
     );
@@ -239,61 +250,4 @@ function Meteo() {
 
 export default Meteo;
 
-// TODO: lat/long from town list
-//    https://open-meteo.com/en/docs/geocoding-api
-//    https://codesandbox.io/s/clever-violet-vxupkq?file=/src/App.js
 
-
-// TODO: add an arrow to show this is a dropdown button
-const MyDropdown = ({ menu, indexCurrent, handle }) => {
-  const [open, setOpen] = useState(false);
-
-  const handleOpen = () => {
-    setOpen(!open);
-  };
-
-  return (
-    <div className="dropdown">
-      <button onClick={handleOpen}> {menu[indexCurrent].label} </button>
-      {open ? (
-        <ul className="menu">
-          {menu.map((menuItem, index) => (
-            <li key={index} className="menu-item">
-              <button onClick={() => { setOpen(false); handle(index);}}> {menuItem.label}  </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  );
-};
-
-// TODO: add an icon to show this is a search
-const MySearchBar = ({ menu, indexCurrent, handle, select }) => {
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('Bordeaux - Gironde');
-
-  const handleOpen = () => {
-    setOpen(!open);
-  };
-
-  return (
-    <div className="searchbar">
-      <input    // todo: add 'enter' to choose the current one
-        type="search"
-        value={value}
-        onChange={(e) => { setOpen(true); setValue(e.target.value); handle(e.target.value); }}
-      />
-
-      {menu && open ? (
-        <ul className="menu">
-          {menu.map((menuItem, index) => (
-            <li key={index} className="menu-item">
-              <button onClick={() => { setOpen(false); setValue(menuItem.name + ' - ' + menuItem.admin2); select(menuItem);}}> {menuItem.name} - {menuItem.admin2}  </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  );
-};

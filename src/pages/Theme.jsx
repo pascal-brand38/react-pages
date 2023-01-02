@@ -107,7 +107,7 @@ function Theme() {
 
   const sizes = [
     cssVar('--root-font-size'),
-    cssVar('--margin-1'),
+    cssVar('--margin-xl'),
   ]
 
   const reset = () => {

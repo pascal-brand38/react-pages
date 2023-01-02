@@ -14,7 +14,11 @@
   --color-1: #bc4123;
 
   //
-  --margin-1: 2rem;
+  --margin-xl: 2rem;
+  --margin-l:  1.5rem;
+  --margin-m:  1rem;
+  --margin-s:  .75rem;
+  --margin-xs: .5rem;
 
   // 
   font-size: var(--root-font-size);
@@ -61,7 +65,7 @@ body {
 }
 
 .pbr-button {
-  margin: var(--margin-1);
+  margin: var(--margin-xl);
   background-color: var(--color-1);
   padding: .5rem 2rem .5rem 2rem;
   border-radius: 1rem;
@@ -72,52 +76,18 @@ body {
 }
 
 h1, h2 {
-  margin-top: var(--margin-1);
-  margin-bottom: var(--margin-1);
+  margin-top: var(--margin-xl);
+  margin-bottom: var(--margin-xl);
 }
 
 
 
-// dropdown
-// TODO: clean this
-.dropdown, .searchbar {
-  position: relative;
-}
-
-.menu {
-  z-index: 2;
-  position: absolute;
-
-  list-style-type: none;
-  margin: 5px 0;
-  padding: 0;
-
-  //border: 1px solid grey;
-  width: 150px;
-}
-
-.menu > li {
-  margin: 0;
-}
-
-.menu > li:hover {
-  //background-color: lightgray;
-}
-
-.menu > li > button, button, input {
-  width: 100%;
-  height: 100%;
-  text-align: left;
-
-  //background: none;
-  // color: inherit;
-  border: none;
-  padding: 5px;
-  margin: 0;
-  cursor: pointer;
-
-  //margin: var(--margin-1);
-  background-color: var(--color-1);
-  //padding: .5rem 2rem .5rem 2rem;
-  border-radius: 1rem;
+.pbr-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &__to-the-right {
+    margin-left: auto;
+  }
 }
