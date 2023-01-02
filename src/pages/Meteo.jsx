@@ -7,10 +7,6 @@ import { useEffect, useState } from "react";
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 
-const dropdownOptions = [
-  'one', 'two', 'three'
-];
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -69,11 +65,21 @@ const meteoConfig = {
 
 // https://open-meteo.com/en/docs/geocoding-api
 // get latitude and longitude from town name
-async function getDataTown(town) {
+async function getDataTown(town, filter) {
   return fetch(
-    "https://geocoding-api.open-meteo.com/v1/search?name=" + town
+    "https://geocoding-api.open-meteo.com/v1/search?language=fr&count=100&name=" + town
   ).then((response) => {
     return response.json();
+  }).then((responses) => {
+    if ((responses) && (responses.results)) {
+      if (filter) {
+        return responses.results.filter((e) => filter.includes(e.country_code));
+      } else {
+        return responses.results;
+      }
+    } else {
+      return null;
+    }
   });
 }
 
@@ -164,15 +170,27 @@ function measureSelect(e, setMeasureIndex) {
 
 function Meteo() {
   var [graphData, setGraphData] = useState(null);
-  var [town, setTown] = useState('bordeaux');
   var [measureIndex, setMeasureIndex] = useState(0);  
+  var [ townCandidates, setTownCandidates ] = useState(null);
+  var [ townInfo, setTownInfo ] = useState(null);
+
+  function getTownCandidates(townStartsWith) {
+    console.log(townStartsWith);
+    getDataTown(townStartsWith, ['FR']).then((candidates) => {
+      console.log(candidates)
+      setTownCandidates(candidates)
+    });
+  }
 
   useEffect(() => {
-    getDataTown(town).then((dataTown) => {
-      // https://gomakethings.com/waiting-for-multiple-all-api-responses-to-complete-with-the-vanilla-js-promise.all-method/
+    if (!townInfo) {
+      getDataTown('Bordeaux', ['FR']).then((dataTown) => setTownInfo(dataTown[0]));
+    }
+
+    if (townInfo) {
       getMultipleApisMeteoDatas(
-        dataTown.results[0].latitude,
-        dataTown.results[0].longitude,
+        townInfo.latitude,
+        townInfo.longitude,
         meteoConfig.apis,
         measureIndex
       ).then(function (datas) {
@@ -191,24 +209,26 @@ function Meteo() {
           });
         });
         chartjsOptions.plugins.title.text = meteoConfig.measures[measureIndex].label
-        chartjsOptions.scales.y.ticks.callback = 
+        chartjsOptions.scales.y.ticks.callback =
           function (value, index, ticks) {
             return value + meteoConfig.measures[measureIndex].axisSuffix;   // TODO: not
           },
 
-        setGraphData({
-          labels: labels,
-          datasets: datasets,
-        });
+          setGraphData({
+            labels: labels,
+            datasets: datasets,
+          });
       });
-    });
-  }, [town, measureIndex]);
+    }
+  }, [townInfo, measureIndex]);
 
   if (graphData) {
     // check dropdown styling at https://www.npmjs.com/package/react-dropdown
     return (
       <>
-        <Dropdown options={meteoConfig.measures} onChange={(e) => measureSelect(e, setMeasureIndex)} value={meteoConfig.measures[0]} placeholder="Select a measure" />
+        <MySearchBar menu={townCandidates} handle={getTownCandidates} select={setTownInfo} />
+        {/* <Dropdown options={meteoConfig.measures} onChange={(e) => measureSelect(e, setMeasureIndex)} value={meteoConfig.measures[0]} placeholder="Select a measure" /> */}
+        <MyDropdown menu={meteoConfig.measures} indexCurrent={measureIndex} handle={setMeasureIndex}/>
         <Line options={chartjsOptions} data={graphData} />
       </>
     );
@@ -222,3 +242,58 @@ export default Meteo;
 // TODO: lat/long from town list
 //    https://open-meteo.com/en/docs/geocoding-api
 //    https://codesandbox.io/s/clever-violet-vxupkq?file=/src/App.js
+
+
+// TODO: add an arrow to show this is a dropdown button
+const MyDropdown = ({ menu, indexCurrent, handle }) => {
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => {
+    setOpen(!open);
+  };
+
+  return (
+    <div className="dropdown">
+      <button onClick={handleOpen}> {menu[indexCurrent].label} </button>
+      {open ? (
+        <ul className="menu">
+          {menu.map((menuItem, index) => (
+            <li key={index} className="menu-item">
+              <button onClick={() => { setOpen(false); handle(index);}}> {menuItem.label}  </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+};
+
+// TODO: add an icon to show this is a search
+const MySearchBar = ({ menu, indexCurrent, handle, select }) => {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('Bordeaux - Gironde');
+
+  const handleOpen = () => {
+    setOpen(!open);
+  };
+
+  return (
+    <div className="searchbar">
+      <input    // todo: add 'enter' to choose the current one
+        type="search"
+        value={value}
+        onChange={(e) => { setOpen(true); setValue(e.target.value); handle(e.target.value); }}
+      />
+
+      {menu && open ? (
+        <ul className="menu">
+          {menu.map((menuItem, index) => (
+            <li key={index} className="menu-item">
+              <button onClick={() => { setOpen(false); setValue(menuItem.name + ' - ' + menuItem.admin2); select(menuItem);}}> {menuItem.name} - {menuItem.admin2}  </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+};
