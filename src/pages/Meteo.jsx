@@ -30,41 +30,81 @@ ChartJS.register(
 
 // from https://open-meteo.com/en/docs/meteofrance-api
 const meteoConfig = {
-  apis: ["meteofrance", "dwd-icon", "gem"],
-  apisDesc: ["Météo France", "Météo Allemagne", "Météo Amérique du nord"],
+  forecast: {
+    baseurl: "https://api.open-meteo.com/v1/",
+    apis: ["meteofrance", "dwd-icon", "gem"],
+    apisDesc: ["Météo France", "Météo Allemagne", "Météo Amérique du nord"],
+  },
 
+  archive: {
+    baseurl: "https://archive-api.open-meteo.com/v1/",
+    apis: ["archive"],
+    apisDesc: ["Historique"],
+  },
   measures: [
     {
       label: 'Température',     // label is required for dropdown react plugin
-      extract: (dataMeteo) => dataMeteo.hourly.temperature_2m,
-      apiField: 'temperature_2m',
+      forecast: {
+        extract: (dataMeteo) => dataMeteo.hourly.temperature_2m,
+        extractLabels: (dataMeteo) => dataMeteo.hourly.time,
+        apiField: '&hourly=temperature_2m',
+      },
+      archive: {
+        extract: (dataMeteo) => dataMeteo.hourly.temperature_2m,
+        extractLabels: (dataMeteo) => dataMeteo.hourly.time,
+        apiField: '&start_date=2010-11-30&end_date=2022-12-31&hourly=temperature_2m',
+      },
       ycallback: (value, index, ticks) => {
         return value + '°' + 'yo';
-      }
+      },
     },
     {
       label: 'Précipitations',
-      extract: (dataMeteo) => dataMeteo.hourly.precipitation,
-      apiField: 'precipitation',
+      forecast: {
+        extract: (dataMeteo) => dataMeteo.hourly.precipitation,
+        extractLabels: (dataMeteo) => dataMeteo.hourly.time,
+        apiField: '&hourly=precipitation',
+      },
+      archive: {
+        extract: (dataMeteo) => dataMeteo.daily.precipitation_sum,
+        extractLabels: (dataMeteo) => dataMeteo.daily.time,
+        apiField: '&start_date=2010-11-30&end_date=2022-12-29&daily=precipitation_sum',
+      },
       ycallback: (value, index, ticks) => {
         return value + 'mm';
-      }
+      },
     },
     {
       label: 'Couverture nuageuse',
-      extract: (dataMeteo) => dataMeteo.hourly.cloudcover,
-      apiField: 'cloudcover',
+      forecast: {
+        extract: (dataMeteo) => dataMeteo.hourly.cloudcover,
+        extractLabels: (dataMeteo) => dataMeteo.hourly.time,
+        apiField: '&hourly=cloudcover',
+      },
+      archive: {
+        extract: (dataMeteo) => dataMeteo.hourly.cloudcover,
+        extractLabels: (dataMeteo) => dataMeteo.hourly.time,
+        apiField: '&start_date=2010-11-30&end_date=2022-12-29&hourly=cloudcover',
+      },
       ycallback: (value, index, ticks) => {
         return value + '%';
-      }
+      },
     },
     {
       label: 'Vent',
-      extract: (dataMeteo) => dataMeteo.hourly.windspeed_10m,
-      apiField: 'windspeed_10m',
+      forecast: {
+        extract: (dataMeteo) => dataMeteo.hourly.windspeed_10m,
+        extractLabels: (dataMeteo) => dataMeteo.hourly.time,
+        apiField: '&hourly=windspeed_10m',
+      },
+      archive: {
+        extract: (dataMeteo) => dataMeteo.hourly.windspeed_10m,
+        extractLabels: (dataMeteo) => dataMeteo.hourly.time,
+        apiField: '&start_date=2010-11-30&end_date=2022-12-29&hourly=windspeed_10m',
+      },
       ycallback: (value, index, ticks) => {
         return value + 'km/h';
-      }
+      },
     },
 
   ],
@@ -92,10 +132,10 @@ async function getDataTown(town, filter) {
 
 // https://open-meteo.com/en/docs/meteofrance-api
 // get meteo (forecast) at latitude / longitude, from the given api (meteofrance / dwd-icon / gem)
-async function getMeteoData(latitude, longitude, api, measureIndex) {
-  const baseurl = "https://api.open-meteo.com/v1/";
+async function getMeteoData(latitude, longitude, api, measureIndex, typeOfMeteo) {
+  const baseurl = meteoConfig[typeOfMeteo].baseurl;
   const where = "&latitude=" + latitude + "&longitude=" + longitude;
-  const what = "&hourly=" + meteoConfig.measures[measureIndex].apiField;
+  const what = meteoConfig.measures[measureIndex][typeOfMeteo].apiField;
   const timezone = "&timezone=Europe%2FBerlin";
   return fetch(baseurl + api + "?" + where + what + timezone).then(
     (response) => {
@@ -104,10 +144,10 @@ async function getMeteoData(latitude, longitude, api, measureIndex) {
   );
 }
 
-async function getMultipleApisMeteoDatas(latitude, longitude, apis, measureIndex) {
+async function getMultipleApisMeteoDatas(latitude, longitude, apis, measureIndex, typeOfMeteo) {
   var cmds = [];
   apis.forEach((api) => {
-    cmds.push(getMeteoData(latitude, longitude, api, measureIndex));
+    cmds.push(getMeteoData(latitude, longitude, api, measureIndex, typeOfMeteo));
   });
   return Promise.all(cmds);
 }
@@ -178,6 +218,7 @@ function Meteo() {
   var [measureIndex, setMeasureIndex] = useState(0);
   var [townCandidates, setTownCandidates] = useState(null);
   var [townInfo, setTownInfo] = useState(null);
+  var [typeOfMeteo, setTypeOfMeteo] = useState('forecast')
 
   function getTownCandidates(townStartsWith) {
     console.log(townStartsWith);
@@ -196,18 +237,21 @@ function Meteo() {
       getMultipleApisMeteoDatas(
         townInfo.latitude,
         townInfo.longitude,
-        meteoConfig.apis,
-        measureIndex
+        meteoConfig[typeOfMeteo].apis,
+        measureIndex,
+        typeOfMeteo
       ).then(function (datas) {
+        console.log(datas)
         var labels = null;
         var datasets = [];
         datas.forEach((data, index) => {
-          if (!labels || labels.length < data.hourly.time.length) {
-            labels = data.hourly.time;
+          const currentLabels = meteoConfig.measures[measureIndex][typeOfMeteo].extractLabels(data)
+          if (!labels || labels.length < currentLabels.length) {
+            labels = currentLabels;
           }
           datasets.push({
-            label: meteoConfig.apisDesc[index],
-            data: meteoConfig.measures[measureIndex].extract(data),
+            label: meteoConfig[typeOfMeteo].apisDesc[index],
+            data: meteoConfig.measures[measureIndex][typeOfMeteo].extract(data),
             borderColor: configs[index].borderColor,
             backgroundColor: configs[index].backgroundColor,
             borderWidth: 1,
@@ -222,29 +266,37 @@ function Meteo() {
         });
       });
     }
-  }, [townInfo, measureIndex]);
+  }, [townInfo, measureIndex, typeOfMeteo]);
 
   if (graphData) {
     return (
       <>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--margin-s)" }}>
-        <PbrDropdown
-          type='searchbar'
-          initialValue={ 'Bordeaux - Gironde '}
-          list={townCandidates}
-          onChange={ getTownCandidates}
-          onSelect={ ({item}) => setTownInfo(item) }
-          valueFromItem={(item) => item.name + ' - ' + item.admin2}
-          />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "var(--margin-s)" }}>
+          <PbrDropdown
+            type='searchbar'
+            initialValue={ 'Bordeaux - Gironde '}
+            list={townCandidates}
+            onChange={ getTownCandidates}
+            onSelect={ ({item}) => setTownInfo(item) }
+            valueFromItem={(item) => item.name + ' - ' + item.admin2}
+            />
 
-        <PbrDropdown
-          type='dropdown'
-          initialValue={meteoConfig.measures[measureIndex].label}
-          list={meteoConfig.measures}
-          onSelect={ ({index}) => setMeasureIndex(index) }
-          valueFromItem={(item) => item.label}
-          />
-          </div>
+          <PbrDropdown
+            type='dropdown'
+            initialValue={meteoConfig.measures[measureIndex].label}
+            list={meteoConfig.measures}
+            onSelect={ ({index}) => setMeasureIndex(index) }
+            valueFromItem={(item) => item.label}
+            />
+
+          <PbrDropdown
+            type='dropdown'
+            initialValue={'Prévisions'}
+            list={['Prévisions', 'Historique']}
+            onSelect={ ({index}) => setTypeOfMeteo((index==0) ? 'forecast' : 'archive') }
+            valueFromItem={(item) => (item)}
+            />
+        </div>
 
         <Line options={chartjsOptions} data={graphData} />
       </>
