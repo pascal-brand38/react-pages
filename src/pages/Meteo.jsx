@@ -38,25 +38,33 @@ const meteoConfig = {
       label: 'Température',     // label is required for dropdown react plugin
       extract: (dataMeteo) => dataMeteo.hourly.temperature_2m,
       apiField: 'temperature_2m',
-      axisSuffix: '°'
+      ycallback: (value, index, ticks) => {
+        return value + '°' + 'yo';
+      }
     },
     {
       label: 'Précipitations',
       extract: (dataMeteo) => dataMeteo.hourly.precipitation,
       apiField: 'precipitation',
-      axisSuffix: 'mm'
+      ycallback: (value, index, ticks) => {
+        return value + 'mm';
+      }
     },
     {
       label: 'Couverture nuageuse',
       extract: (dataMeteo) => dataMeteo.hourly.cloudcover,
       apiField: 'cloudcover',
-      axisSuffix: '%'
+      ycallback: (value, index, ticks) => {
+        return value + '%';
+      }
     },
     {
       label: 'Vent',
       extract: (dataMeteo) => dataMeteo.hourly.windspeed_10m,
       apiField: 'windspeed_10m',
-      axisSuffix: 'km/h'
+      ycallback: (value, index, ticks) => {
+        return value + 'km/h';
+      }
     },
 
   ],
@@ -125,6 +133,7 @@ var chartjsOptions = {
     // checks https://www.chartjs.org/docs/latest/axes/labelling.html#creating-custom-tick-formats
     x: {
       ticks: {
+        autoskip: false,
         callback: function (value, index, ticks) {
           if ((index + 12) % 24 == 0) {
             const reYearMonth = /[0-9]{4}-[0-9]{2}-/g;
@@ -205,15 +214,12 @@ function Meteo() {
           });
         });
         chartjsOptions.plugins.title.text = meteoConfig.measures[measureIndex].label
-        chartjsOptions.scales.y.ticks.callback =
-          function (value, index, ticks) {
-            return value + meteoConfig.measures[measureIndex].axisSuffix;   // TODO: not
-          },
+        chartjsOptions.scales.y.ticks.callback = meteoConfig.measures[measureIndex].ycallback;
 
-          setGraphData({
-            labels: labels,
-            datasets: datasets,
-          });
+        setGraphData({
+          labels: labels,
+          datasets: datasets,
+        });
       });
     }
   }, [townInfo, measureIndex]);

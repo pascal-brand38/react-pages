@@ -2,7 +2,6 @@
 /// MIT License
 ///
 ///
-/// TODO: enter on the search bar to select the 1st one
 /// TODO: click on arrow to close/open dropdown
 /// TODO: keyboard arrow to select in the dropdown list
 ///
@@ -50,7 +49,7 @@ const PbrDropdown = (
 
   return (
     <div className="pbr-dropdown">
-      <div class="pbr-dropdown__top">
+      <div className="pbr-dropdown__top">
         {(type === 'dropdown') &&
           <button onClick={toggleOpen}> {value} </button>}
 
@@ -59,6 +58,10 @@ const PbrDropdown = (
             type="text"
             value={value}
             onChange={(e) => { setOpen(true); setValue(e.target.value); onChange(e.target.value); }}
+            onKeyUp={({key}) => {
+              if ((key === "Enter") && list && open) {
+                selectItem({ index: 0, item: list[0] })
+              }}}
           />
         }
 
@@ -69,7 +72,7 @@ const PbrDropdown = (
         <ul className="pbr-dropdown__list">
           {list.map((item, index) => (
             <li key={index} className="pbr-dropdown__list-item">
-              <button onClick={() => selectItem({ index: index, item: item })}>
+              <button className="pbr-dropdown__list-item" onClick={() => selectItem({ index: index, item: item })}>
                 {valueFromItem(item)}
               </button>
             </li>
@@ -80,6 +83,4 @@ const PbrDropdown = (
   );
 }
 
-
 export default PbrDropdown;
-

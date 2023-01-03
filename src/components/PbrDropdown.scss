@@ -38,6 +38,9 @@
     // width: 150px;
   }
 
+  &__list-item {
+    width: 100%;
+  }
   &__list-item:hover {
     opacity: 0.5;
   }
