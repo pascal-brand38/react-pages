@@ -1,7 +1,10 @@
 /// Copyright (c) Pascal Brand
 /// MIT License
 ///
-///
+/// TODO: archive: update 1st and last date
+/// TODO: graph of comparison between years
+/// TODO: add sum of rainfall on the year
+/// TODO: add loading icons when fetching data
 
 import { useEffect, useState } from "react";
 import PbrDropdown from '../components/PbrDropdown'

@@ -4,7 +4,9 @@ import {
   Route, 
   RouterProvider
 } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async';
 
+// pages
 import Home from './pages/Home'
 import TextEffect from './pages/TextEffect'
 import Theme from './pages/Theme'
@@ -14,6 +16,8 @@ import { Outlet, NavLink } from "react-router-dom";
 
 function RootLayout() {
   return (
+    <HelmetProvider>
+
     <div className="pbr-container">
       <header>
         <nav className='pbr-menu'>
@@ -30,6 +34,8 @@ function RootLayout() {
         <Outlet />    { /* the page of the Route element is displayed */ }
       </main>
     </div>
+    </HelmetProvider>
+
   )
 }
 
