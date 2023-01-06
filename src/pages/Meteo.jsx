@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from "react";
 import PbrDropdown from '../components/PbrDropdown'
+import '../scss/utility/pbr-loading.scss'
 
 import {
   Chart as ChartJS,
@@ -216,12 +217,21 @@ const configs = [
 ];
 
 
+function PbrLoading() {
+  return (
+    <div className="pbr-flex pbr-modal">
+      <div className="pbr-loading-spin">  </div>
+    </div>
+  );
+}
+
 function Meteo() {
   var [graphData, setGraphData] = useState(null);
   var [measureIndex, setMeasureIndex] = useState(0);
   var [townCandidates, setTownCandidates] = useState(null);
   var [townInfo, setTownInfo] = useState(null);
   var [typeOfMeteo, setTypeOfMeteo] = useState('forecast')
+  const [ loading, setLoading ] = useState(false);
 
   function getTownCandidates(townStartsWith) {
     console.log(townStartsWith);
@@ -237,6 +247,7 @@ function Meteo() {
     }
 
     if (townInfo) {
+      setLoading(true);
       getMultipleApisMeteoDatas(
         townInfo.latitude,
         townInfo.longitude,
@@ -267,48 +278,45 @@ function Meteo() {
           labels: labels,
           datasets: datasets,
         });
+        setLoading(false);
       });
     }
   }, [townInfo, measureIndex, typeOfMeteo]);
 
-  if (graphData) {
-    return (
-      <>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "var(--margin-s)" }}>
-          <PbrDropdown
-            type='searchbar'
-            initialValue={ 'Bordeaux - Gironde '}
-            list={townCandidates}
-            onChange={ getTownCandidates}
-            onSelect={ ({item}) => setTownInfo(item) }
-            valueFromItem={(item) => item.name + ' - ' + item.admin2}
-            />
+  return (
+    <>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "var(--margin-s)" }}>
+        <PbrDropdown
+          type='searchbar'
+          initialValue={ 'Bordeaux - Gironde '}
+          list={townCandidates}
+          onChange={ getTownCandidates}
+          onSelect={ ({item}) => setTownInfo(item) }
+          valueFromItem={(item) => item.name + ' - ' + item.admin2}
+          />
 
-          <PbrDropdown
-            type='dropdown'
-            initialValue={meteoConfig.measures[measureIndex].label}
-            list={meteoConfig.measures}
-            onSelect={ ({index}) => setMeasureIndex(index) }
-            valueFromItem={(item) => item.label}
-            />
+        <PbrDropdown
+          type='dropdown'
+          initialValue={meteoConfig.measures[measureIndex].label}
+          list={meteoConfig.measures}
+          onSelect={ ({index}) => setMeasureIndex(index) }
+          valueFromItem={(item) => item.label}
+          />
 
-          <PbrDropdown
-            type='dropdown'
-            initialValue={'Prévisions'}
-            list={['Prévisions', 'Historique']}
-            onSelect={ ({index}) => setTypeOfMeteo((index==0) ? 'forecast' : 'archive') }
-            valueFromItem={(item) => (item)}
-            />
-        </div>
+        <PbrDropdown
+          type='dropdown'
+          initialValue={'Prévisions'}
+          list={['Prévisions', 'Historique']}
+          onSelect={ ({index}) => setTypeOfMeteo((index==0) ? 'forecast' : 'archive') }
+          valueFromItem={(item) => (item)}
+          />
+      </div>
 
-        <Line options={chartjsOptions} data={graphData} />
-      </>
-    );
-  } else {
-    return <p> Loading...</p>
-  }
+      {loading && <PbrLoading /> }
+
+      { graphData && <Line options={chartjsOptions} data={graphData} /> }
+    </>
+  );
 }
 
 export default Meteo;
-
-
