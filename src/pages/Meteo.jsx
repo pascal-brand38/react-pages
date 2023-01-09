@@ -7,8 +7,9 @@
 /// TODO: add loading icons when fetching data
 
 import { useEffect, useState } from "react";
-import PbrDropdown from '../components/PbrDropdown'
-import '../scss/utility/pbr-loading.scss'
+
+import RchDropdown from 'react-components-helper/components/RchDropdown'
+import 'react-components-helper/scss/utility/rch-loading.scss'
 
 import {
   Chart as ChartJS,
@@ -220,7 +221,7 @@ const configs = [
 function PbrLoading() {
   return (
     <div className="pbr-flex pbr-modal">
-      <div className="pbr-loading-spin">  </div>
+      <div className="rch-loading-spin">  </div>
     </div>
   );
 }
@@ -286,7 +287,7 @@ function Meteo() {
   return (
     <>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "var(--margin-s)" }}>
-        <PbrDropdown
+        <RchDropdown
           type='searchbar'
           initialValue={ 'Bordeaux - Gironde '}
           list={townCandidates}
@@ -295,7 +296,7 @@ function Meteo() {
           valueFromItem={(item) => item.name + ' - ' + item.admin2}
           />
 
-        <PbrDropdown
+        <RchDropdown
           type='dropdown'
           initialValue={meteoConfig.measures[measureIndex].label}
           list={meteoConfig.measures}
@@ -303,7 +304,7 @@ function Meteo() {
           valueFromItem={(item) => item.label}
           />
 
-        <PbrDropdown
+        <RchDropdown
           type='dropdown'
           initialValue={'Prévisions'}
           list={['Prévisions', 'Historique']}
