@@ -100,14 +100,14 @@ function ThemeColor({ colors, title }) {
 /// Display all css variable we are able to update
 function Theme() {
   const colors = [
-    cssVar('--body-color'),
-    cssVar('--body-bg-color'),
-    cssVar('--color-1'),
+    cssVar('--rch-body-color'),
+    cssVar('--rch-body-bg-color'),
+    cssVar('--rch-color-1'),
   ];
 
   const sizes = [
-    cssVar('--root-font-size'),
-    cssVar('--margin-xl'),
+    cssVar('--rch-root-font-size'),
+    cssVar('--rch-margin-xl'),
   ]
 
   const reset = () => {

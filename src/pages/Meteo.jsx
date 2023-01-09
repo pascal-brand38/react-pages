@@ -286,7 +286,7 @@ function Meteo() {
 
   return (
     <>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "var(--margin-s)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "var(--rch-margin-s)" }}>
         <RchDropdown
           type='searchbar'
           initialValue={ 'Bordeaux - Gironde '}
