@@ -1,4 +1,15 @@
-npm install react-router-dom
+# Vite
+
+## Install
+
+    npm install -g vite
+    npm init vite <project_name>
+    cd <project_name>
+    npm install
+
+## Use
+
+    npm run dev
 
 
 # Deploy on Github Pages
